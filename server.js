@@ -3,6 +3,9 @@ const app = express()
 
 const http = require('http')
 const server = http.createServer(app);
+const io = require("socket.io")(server, {});
+
+const htmlEntities =  require('html-entities');
 
 const bodyParser = require("body-parser");
 
@@ -18,6 +21,31 @@ const port = process.env.PORT || 3000
 
 
 app.use('', require('./routes/route'))
+
+io.on("connection", (socket) => {
+  console.log('New User', socket.conn.id);
+
+  socket.on('join-room', (roomId, userId) => {
+    socket.join(roomId)
+    socket.to(roomId).emit('user-connected', socket.conn.id)
+
+    socket.on('disconnect', () => {
+      socket.to(roomId).emit('user-disconnected', socket.conn.id)
+    })
+
+    socket.on('message', (message) => {
+      console.log('rec',message, socket.conn.id)
+      let messageObj = {
+        message: htmlEntities.encode(message),
+        user: socket.conn.id,
+      }
+      socket.to(roomId).emit('new-message', messageObj)
+    })
+  })
+
+
+
+});
 
 
 server.listen(3000, () => {
