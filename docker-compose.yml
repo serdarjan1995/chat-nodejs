@@ -1,0 +1,35 @@
+version: '3'
+services:
+  app:
+    image: chat-app:1.0
+    container_name: chat-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    tty: true
+    volumes:
+      - .:/app
+    ports:
+      - 3000:3000
+    env_file:
+      - ./.env
+    restart: always
+    networks:
+      - nodejs
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx-webserver
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/app
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - nodejs
+    depends_on:
+      - app
+
+networks:
+  nodejs:
+    driver: bridge
