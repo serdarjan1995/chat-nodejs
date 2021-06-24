@@ -25,7 +25,6 @@ socket.on('new-message', mess => {
 socket.emit('join-room', ROOM_ID, client_id)
 
 $("#submitmsg").click(() => {
-  console.log('click')
   let clientmsg = $("#usermsg").val();
   socket.emit('message', clientmsg)
   $("#usermsg").val("");
